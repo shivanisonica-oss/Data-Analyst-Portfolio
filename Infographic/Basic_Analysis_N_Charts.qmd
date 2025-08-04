@@ -1,0 +1,93 @@
+---
+title: "Untitled"
+format: pdf
+---
+
+Penguins Infographic
+
+```{r}
+df <- read.csv(file = "palmerpenguins_extended.csv")
+df$species <- as.factor(df$species)
+df$sex <- as.factor(df$sex)
+df$life_stage <- as.factor(df$life_stage)
+df$health_metrics <- as.factor(df$health_metrics)
+df$body_mass_g <- df$body_mass_g/1000
+str(df)
+#summary(df$body_mass_g)
+```
+
+```{r include=false}
+library(patternplot)
+library(jpeg)
+library(ggplot2)
+library(rstatix)
+library(lubridate)
+library(lessR)
+library(readr)
+library(tidyverse)
+library(GGally)
+library(plotrix)
+```
+
+```{r}
+aggregate(df$body_mass_g, list(df$species,df$life_stage,df$health_metrics),FUN=mean)
+
+tab <- table(df$species,df$health_metrics,df$year==2022)
+
+sps <- c("Adelie","Adelie","Adelie","Chinstrap","Chinstrap","Chinstrap","Gentoo","Gentoo","Gentoo")
+helt <- c("Healthy","Overweight","Underweight","Healthy","Overweight","Underweight","Healthy","Overweight","Underweight")
+cnt <- c(143,92,60,62,24,39,103,102,33)
+mat1 <- data.frame(sps,helt,cnt)
+mat1
+
+df1 <- filter(df,df$year==2022)
+str(df1)
+Species <- df1$species
+Health <- df1$health_metrics
+Diet <- df1$diet
+tab <- table(df1$species,df1$health_metrics)
+
+df2 <- data.frame(df1$species,df1$health_metrics,df1$diet)
+colnames(df2) <- c("Species","Health","Diet")
+round(proportions(table(df2))*100,2)
+ggplot(data = df2,aes(fill=Species,y=Health))+
+  geom_bar(position = "fill",stat = "identity")+
+  ggtitle("Proportion of Health Stats based on Species")+
+  ylab("Species Proportions")
+
+mosaicplot(df1$diet~df1$health_metrics,data = df1,
+           main = "Diet to Health Metrics",
+           xlab="Diet",ylab="Health Metrics",
+           col=c("Lightgreen","Blue","Skyblue"))
+proportions(table(df1$life_stage))*100
+pie(proportions(table(df1$life_stage))*100)
+pie3D(proportions(table(df1$life_stage))*100,
+      labels = c("Adult","Chick","Juvenile"),explode = 0.1)
+```
+
+```{r}
+library(dplyr)
+
+# Create Data
+#data <- data.frame(
+#  group=LETTERS[1:5],
+#  value=c(13,7,9,21,2)
+#)
+
+# Compute the position of labels
+data <- mat1 %>% 
+  arrange(desc(sps)) %>%
+  mutate(prop = cnt / sum(mat1$cnt) *100) %>%
+  mutate(ypos = cumsum(prop)- 0.5*prop )
+
+# Basic piechart
+ggplot(data, aes(x="", y=prop, fill=helt)) +
+  geom_bar(stat="identity", width=1, color="white") +
+  coord_polar("y", start=0) +
+  theme_void() + 
+  theme(legend.position="none")
+```
+
+
+
+

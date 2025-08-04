@@ -1,0 +1,11 @@
+patternplot
+jpeg
+ggplot2
+rstatix
+lubridate
+lessR
+readr
+tidyverse
+GGally
+plotrix
+dplyr
